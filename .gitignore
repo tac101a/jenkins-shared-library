@@ -1,0 +1,13 @@
+# Hệ điều hành
+.DS_Store
+Thumbs.db
+
+# Cấu hình IDE (Rất quan trọng để không ép người khác dùng chung IDE với bạn)
+.idea/
+.vscode/
+*.iml
+*.iws
+
+# Log và các file tạm
+*.log
+tmp/

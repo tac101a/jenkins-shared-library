@@ -4,6 +4,8 @@ def call(Map config) {
     def buildNum = config.buildNum
     def nexusDockerUrl = config.nexusDockerUrl
     def credId = config.credId
+    def dbUrl = config.dbUrl
+    def dbCredId = config.dbCredId
 
     def safeBranchName = branchName.replaceAll("/", "-")
     def imageTag = "${nexusDockerUrl}/${appName}:${buildNum}-${safeBranchName}"
@@ -13,7 +15,10 @@ def call(Map config) {
     
     echo "Tien hanh Deploy Docker Image: ${imageTag}"
 
-    withCredentials([usernamePassword(credentialsId: credId, passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
+    withCredentials([
+        usernamePassword(credentialsId: credId, passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER'),
+        usernamePassword(credentialsId: dbCredId, passwordVariable: 'DB_PASS', usernameVariable: 'DB_USER')
+    ]) {
         sh """
             echo "1. Dang nhap vao Nexus Docker Registry..."
             echo "\${DOCKER_PASS}" | docker login ${nexusDockerUrl} -u "\${DOCKER_USER}" --password-stdin
@@ -39,7 +44,13 @@ def call(Map config) {
             fi
 
             echo "5. Khoi chay Container phien ban moi (Mount Log)..."
-            docker run -d --name ${containerName} -p ${hostPort}:8080 -v /opt/petclinic/logs:/app/logs ${imageTag}
+            docker run -d --name ${containerName} -p ${hostPort}:8080 \\
+            -v /opt/petclinic/logs:/app/logs \\
+            -e SPRING_DATASOURCE_URL=${dbUrl} \\
+            -e SPRING_DATASOURCE_USERNAME="\${DB_USER}" \\
+            -e SPRING_DATASOURCE_PASSWORD="\${DB_PASS}" \\
+            ${imageTag} \\
+            --spring.profiles.active=postgres
 
             echo "6. Health Check (Cho Spring Boot khoi đong)..."
             IS_HEALTHY=false

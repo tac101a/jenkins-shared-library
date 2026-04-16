@@ -47,8 +47,8 @@ def call(Map config) {
             docker run -d --name ${containerName} -p ${hostPort}:8080 \\
             -v /opt/petclinic/logs:/app/logs \\
             -e SPRING_DATASOURCE_URL=${dbUrl} \\
-            -e SPRING_DATASOURCE_USERNAME="\${DB_USER}" \\
-            -e SPRING_DATASOURCE_PASSWORD="\${DB_PASS}" \\
+            -e SPRING_DATASOURCE_USERNAME="\$DB_USER" \\
+            -e SPRING_DATASOURCE_PASSWORD="\$DB_PASS" \\
             ${imageTag} \\
             --spring.profiles.active=postgres
 
@@ -72,8 +72,12 @@ def call(Map config) {
                     docker rm -f ${backupName}
                 fi
             else
-                echo "🚨 DEPLOY THẤT BẠI! Ung dung chet lam sang. KÍCH HOẠT ROLLBACK..."
-                echo "Xoa container phien ban loi..."
+                echo "🚨 DEPLOY THẤT BẠI! Ung dung chet lam sang."
+                echo "================================================="
+                echo "🔍 TRÍCH XUẤT LOG CONTAINER TRƯỚC KHI BỊ TIÊU DIỆT:"
+                docker logs ${containerName}
+                echo "================================================="
+                echo "KÍCH HOẠT ROLLBACK... Xoa container phien ban loi..."
                 docker rm -f ${containerName}
                 
                 if [ "\$(docker ps -aq -f name=^/${backupName}\$)" ]; then
@@ -84,8 +88,7 @@ def call(Map config) {
                 else
                     echo "Khong co ban backup nao đe hoi sinh. He thong đang DOWN!"
                 fi
-                
-                # Bao loi đe Jenkins đanh xap luong Pipeline
+
                 exit 1
             fi
         """

@@ -20,6 +20,9 @@ def call(Map config) {
         usernamePassword(credentialsId: dbCredId, passwordVariable: 'DB_PASS', usernameVariable: 'DB_USER')
     ]) {
         sh """
+            echo "0. Don dep tài nguyên mồ côi đe giải phóng ổ cứng..."
+            docker volume prune -f || true
+
             echo "1. Dang nhap vao Nexus Docker Registry..."
             echo "\${DOCKER_PASS}" | docker login ${nexusDockerUrl} -u "\${DOCKER_USER}" --password-stdin
             

@@ -19,14 +19,14 @@ def call(Map config) {
 
 	echo "Kich hoat Auto Tagging: ${generatedTagName}"
 
-	withEnv(["TAG_NAME=${generatedTagName}"]) {
+	withEnv(["TAG_NAME=${generatedTagName}", "GIT_REPO_DOMAIN=${gitRepoDomain}"]) {
 		withCredentials([usernamePassword(credentialsId: credId, passwordVariable: 'GIT_PASS', usernameVariable: 'GIT_USER')]) {
-			sh """
+			sh '''
 				git config user.email "jenkins@fpt.com"
 				git config user.name "Jenkins CI"
-				git tag -a \${TAG_NAME} -m "Auto deploy from Jenkins"
-				git push https://\${GIT_USER}:\${GIT_PASS}@${gitRepoDomain} \${TAG_NAME}
-			"""
+				git tag -a "$TAG_NAME" -m "Auto deploy from Jenkins"
+				git push "https://$GIT_USER:$GIT_PASS@$GIT_REPO_DOMAIN" "$TAG_NAME"
+			'''
 		}
 	}
 }

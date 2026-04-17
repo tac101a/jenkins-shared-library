@@ -20,12 +20,12 @@ def call(Map config) {
         usernamePassword(credentialsId: dbCredId, passwordVariable: 'DB_PASS', usernameVariable: 'DB_USER')
     ]) {
         withEnv([
-            "IMAGE_TAG=${imageTag}",
-            "NEXUS_URL=${nexusDockerUrl}",
-            "APP_NAME=${containerName}",
-            "BACKUP_NAME=${backupName}",
-            "DB_URL=${dbUrl}",
-            "HOST_PORT=${hostPort}"
+            'IMAGE_TAG=' + imageTag,
+            'NEXUS_URL=' + nexusDockerUrl,
+            'APP_NAME=' + containerName,
+            'BACKUP_NAME=' + backupName,
+            'DB_URL=' + dbUrl,
+            'HOST_PORT=8080'
         ]) {
             sh '''
                 echo "0. Don dep tài nguyên mồ côi..."

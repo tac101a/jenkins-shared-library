@@ -12,7 +12,10 @@ def call(Map config) {
     echo "Bat dau tien trinh Build & Push Docker Image: ${imageTag}"
 
     withCredentials([usernamePassword(credentialsId: credId, passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
-        withEnv(["IMAGE_TAG=${imageTag}", "NEXUS_URL=${nexusDockerUrl}"]) {
+        withEnv([
+            'IMAGE_TAG=' + imageTag,
+            'NEXUS_URL=' + nexusDockerUrl
+        ]) {
             sh '''
                 echo "1. Dang nhap vao Nexus Docker Registry..."
                 echo "$DOCKER_PASS" | docker login $NEXUS_URL -u "$DOCKER_USER" --password-stdin

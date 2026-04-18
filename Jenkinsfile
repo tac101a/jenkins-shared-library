@@ -17,26 +17,26 @@ pipeline {
 
     stages {
         // GROUP 1: RUN FOR ALL (develop, uat, main, PR)
-        stage('Giai doan 1: Compile') {
+        stage('stage 1: Compile') {
             steps {
                 mavenExecute('clean compile')
             }
         }
         
-        stage('Giai doan 2: Unit Test') {
+        stage('stage 2: Unit Test') {
             steps {
                 mavenExecute('test')
             }
         }
         
-        stage('Giai doan 3: SonarQube') {
+        stage('stage 3: SonarQube') {
             steps {
                 sonarScan(env.SONAR_SERVER_NAME)
             }
         }
 
         // GROUP 2: RUN FOR ALL 3 ENVIRONMENTS (DEV, UAT, MAIN)
-        stage('Giai doan 4: Deploy Nexus') {
+        stage('stage 4: Deploy Nexus') {
             when {
                 anyOf {
                     branch 'develop/*'
@@ -55,7 +55,7 @@ pipeline {
             }
         }
 
-        stage('Giai doan 4.5: Build & Push Docker') {
+        stage('stage 4.5: Build & Push Docker') {
             when {
                 anyOf {
                     branch 'develop/*'
@@ -74,7 +74,7 @@ pipeline {
             }
         }
         
-        stage('Giai doan 5: Deploy App & Health Check') {
+        stage('stage 5: Deploy App & Health Check') {
             when {
                 anyOf {
                     branch 'develop/*'
@@ -96,7 +96,7 @@ pipeline {
         }
 
         // GROUP 3: RUN ONLY FOR UAT AND MAIN
-        stage('Giai doan 6: Auto-Tagging') {
+        stage('stage 6: Auto-Tagging') {
             when { 
                 beforeAgent true
                 anyOf {

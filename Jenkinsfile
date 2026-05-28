@@ -5,13 +5,13 @@ pipeline {
     
     environment {
         APP_NAME = 'spring-petclinic'
-        GITHUB_REPO_DOMAIN = 'github.com/tac101a/spring-petclinic.git'
+        GITHUB_REPO_DOMAIN = '10.89.25.145/devops-training/2026/anhcnt1/spring-petclinic.git'
         SONAR_SERVER_NAME = 'sonar-server'
         NEXUS_URL = 'http' + '://nexus.abc/repository/maven-releases'
         NEXUS_DOCKER_URL = 'docker.abc:80'
         DB_URL = 'jdbc:postgresql://10.0.0.5:5432/petclinic'
         DB_CREDENTIALS_ID = 'postgres-credentials'
-        GIT_CREDENTIALS_ID = 'github-token-credentials'
+        GIT_CREDENTIALS_ID = 'gitlab-token-credentials'
         NEXUS_CREDENTIALS_ID = 'nexus-credentials'
     }
 

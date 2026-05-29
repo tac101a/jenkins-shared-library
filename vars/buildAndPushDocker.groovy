@@ -25,10 +25,10 @@ def call(Map config) {
                     buildah bud --tls-verify=false -t $IMAGE_TAG .
 
                     echo "3. Push Docker Image len Nexus..."
-                    buildah push --tls-verify=false $IMAGE_TAG
+                    buildah push --tls-verify=false --format docker $IMAGE_TAG
 
                     echo "4. Don dep rac..."
-                    buildah rmi --tls-verify=false $IMAGE_TAG
+                    buildah rmi $IMAGE_TAG
                 '''
             }
         }

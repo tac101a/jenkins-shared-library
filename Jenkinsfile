@@ -8,6 +8,9 @@ pipeline {
             apiVersion: v1
             kind: Pod
             spec:
+              volumes:
+                - name: buildah-storage
+                  emptyDir: {}
               containers:
               - name: maven
                 image: 10.89.25.146:9006/jenkins/maven:3.9.12-eclipse-temurin-21-noble
@@ -29,6 +32,14 @@ pipeline {
                 tty: true
                 securityContext:
                   privileged: true
+                resources:
+                  requests:
+                    memory: "1Gi"
+                  limits:
+                    memory: "2Gi"
+                volumeMounts:
+                  - name: buildah-storage
+                    mountPath: /var/lib/containers
             '''
         }
     }

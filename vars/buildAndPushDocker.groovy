@@ -28,7 +28,7 @@ def call(Map config) {
                     buildah push --tls-verify=false $IMAGE_TAG
 
                     echo "4. Don dep rac..."
-                    buildah rmi $IMAGE_TAG
+                    buildah rmi --tls-verify=false $IMAGE_TAG
                 '''
             }
         }

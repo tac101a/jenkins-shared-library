@@ -16,19 +16,21 @@ def call(Map config) {
             'IMAGE_TAG=' + imageTag,
             'NEXUS_URL=' + nexusDockerUrl
         ]) {
-            sh '''
-                echo "1. Dang nhap vao Nexus Docker Registry..."
-                echo "$DOCKER_PASS" | docker login $NEXUS_URL -u "$DOCKER_USER" --password-stdin
+            container('buildah') {
+                sh '''
+                    echo "1. Dang nhap vao Nexus Docker Registry..."
+                    buildah login --tls-verify=false -u "$DOCKER_USER" -p "$DOCKER_PASS" $NEXUS_URL
 
-                echo "2. Build Docker Image tu Dockerfile..."
-                docker build -t $IMAGE_TAG .
+                    echo "2. Build Docker Image tu Dockerfile..."
+                    buildah bud --tls-verify=false -t $IMAGE_TAG .
 
-                echo "3. Push Docker Image len Nexus..."
-                docker push $IMAGE_TAG
+                    echo "3. Push Docker Image len Nexus..."
+                    buildah push --tls-verify=false $IMAGE_TAG
 
-                echo "4. Don dep rac..."
-                docker rmi $IMAGE_TAG
-            '''
+                    echo "4. Don dep rac..."
+                    buildah rmi $IMAGE_TAG
+                '''
+            }
         }
     }
 }

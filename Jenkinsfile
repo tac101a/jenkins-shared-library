@@ -1,7 +1,33 @@
-@Library('my-shared-lib') _
+@Library('anhcnt1-shared-library') _
 
 pipeline {
-    agent any
+    agent {
+        kubernetes {
+            yaml '''
+            apiVersion: v1
+            kind: Pod
+            spec:
+              containers:
+              - name: maven
+                image: 10.89.25.146:9006/jenkins/maven:3.9.12-eclipse-temurin-21-noble
+                command: ['cat']
+                tty: true
+                resources:
+                  requests:
+                    memory: "512Mi"
+                    cpu: "250m"
+                  limits:
+                    memory: "1Gi"
+                    cpu: "500m"
+              - name: buildah
+                image: 10.89.25.146:9006/jenkins/buildah:v1.38-stable
+                command: ['cat']
+                tty: true
+                securityContext:
+                  privileged: true
+            '''
+        }
+    }
     
     environment {
         APP_NAME = 'spring-petclinic'

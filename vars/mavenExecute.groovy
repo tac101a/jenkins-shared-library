@@ -1,4 +1,6 @@
 def call(String mavenCommand) {
-	sh "chmod +x mvnw"
-	sh "./mvnw ${mavenCommand}"
+	container('maven') {
+		sh "chmod +x mvnw"
+		sh "./mvnw ${mavenCommand}"
+	}
 }

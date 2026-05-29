@@ -1,14 +1,14 @@
 @Library('my-shared-lib') _
 
 pipeline {
-    agent { label 'docker-node' }
+    agent any
     
     environment {
         APP_NAME = 'spring-petclinic'
         GITHUB_REPO_DOMAIN = '10.89.25.145/devops-training/2026/anhcnt1/spring-petclinic.git'
         SONAR_SERVER_NAME = 'sonar-server'
-        NEXUS_URL = 'http' + '://nexus.abc/repository/maven-releases'
-        NEXUS_DOCKER_URL = 'docker.abc:80'
+        NEXUS_URL = 'http' + '://10.89.25.146:8081/repository/maven-releases'
+        NEXUS_DOCKER_URL = 'http' + '://10.89.25.146:8082'
         DB_URL = 'jdbc:postgresql://10.0.0.5:5432/petclinic'
         DB_CREDENTIALS_ID = 'postgres-credentials'
         GIT_CREDENTIALS_ID = 'gitlab-token-credentials'

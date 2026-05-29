@@ -8,13 +8,6 @@ pipeline {
             apiVersion: v1
             kind: Pod
             spec:
-              volumes:
-                - name: maven-repo
-                  persistentVolumeClaim:
-                    claimName: jenkins-pvc
-                - name: maven-settings
-                  secret:
-                    secretName: maven-setting
               containers:
               - name: maven
                 image: 10.89.25.146:9006/jenkins/maven:3.9.12-eclipse-temurin-21-noble
@@ -30,12 +23,6 @@ pipeline {
                   limits:
                     memory: "2Gi"
                     cpu: "500m"
-                volumeMounts:
-                  - name: maven-repo
-                    mountPath: /root/.m2/repository
-                  - name: maven-settings
-                    mountPath: /root/.m2/settings.xml
-                    subPath: settings.xml
               - name: buildah
                 image: 10.89.25.146:9006/jenkins/buildah:v1.38-stable
                 command: ['cat']

@@ -8,18 +8,34 @@ pipeline {
             apiVersion: v1
             kind: Pod
             spec:
+              volumes:
+                - name: maven-repo
+                  persistentVolumeClaim:
+                    claimName: jenkins-pvc
+                - name: maven-settings
+                  secret:
+                    secretName: maven-setting
               containers:
               - name: maven
                 image: 10.89.25.146:9006/jenkins/maven:3.9.12-eclipse-temurin-21-noble
                 command: ['cat']
                 tty: true
+                env:
+                  - name: MAVEN_OPTS
+                    value: "-Xmx1024m"
                 resources:
                   requests:
-                    memory: "512Mi"
+                    memory: "1Gi"
                     cpu: "250m"
                   limits:
-                    memory: "1Gi"
+                    memory: "2Gi"
                     cpu: "500m"
+                volumeMounts:
+                  - name: maven-repo
+                    mountPath: /root/.m2/repository
+                  - name: maven-settings
+                    mountPath: /root/.m2/settings.xml
+                    subPath: settings.xml
               - name: buildah
                 image: 10.89.25.146:9006/jenkins/buildah:v1.38-stable
                 command: ['cat']
@@ -34,8 +50,8 @@ pipeline {
         APP_NAME = 'spring-petclinic'
         GITHUB_REPO_DOMAIN = '10.89.25.145/devops-training/2026/anhcnt1/spring-petclinic.git'
         SONAR_SERVER_NAME = 'sonar-server'
-        NEXUS_URL = 'http' + '://10.89.25.146:8081/repository/maven-releases'
-        NEXUS_DOCKER_URL = 'http' + '://10.89.25.146:8082'
+        NEXUS_URL = 'http://10.89.25.146:8081/repository/maven-releases'
+        NEXUS_DOCKER_URL = '10.89.25.146:8082'
         DB_URL = 'jdbc:postgresql://10.0.0.5:5432/petclinic'
         DB_CREDENTIALS_ID = 'postgres-credentials'
         GIT_CREDENTIALS_ID = 'gitlab-token-credentials'

@@ -26,8 +26,8 @@ def call(Map config) {
                 sh '''
                     set +x
                     echo "1. Dang nhap OpenShift CRC..."
-                    oc login --token=${OS_TOKEN} --server=https://api.crc.testing:6443 --insecure-skip-tls-verify=true
-                    oc project anhcnt1-project
+                    oc login --token=${OS_TOKEN} --server=https://api.ocp.bankhub.s68:6443 --insecure-skip-tls-verify=true
+                    oc project training
 
                     echo "2. Cau hinh image pull secret..."
                     oc create secret docker-registry nexus-docker-credentials \

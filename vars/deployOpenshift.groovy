@@ -47,6 +47,7 @@ def call(Map config) {
                     else
                         oc create deployment "$APP_NAME" --image="$IMAGE_TAG"
                     fi
+                    oc set node-selector deployment/"$APP_NAME" kubernetes.io/hostname="cpp00061764l"
 
                     echo "5. Publish Service/Route..."
                     oc expose deployment "$APP_NAME" --port=8080 --target-port=8080 >/dev/null 2>&1 || true

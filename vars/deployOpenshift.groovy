@@ -44,13 +44,6 @@ def call(Map config) {
                         oc create deployment "$APP_NAME" --image="$IMAGE_TAG"
                     fi
 
-                    echo "4. Cau hinh bien moi truong..."
-                    oc set env deployment/"$APP_NAME" \
-                        SPRING_DATASOURCE_URL="$DB_URL" \
-                        SPRING_DATASOURCE_USERNAME="$DB_USER" \
-                        SPRING_DATASOURCE_PASSWORD="$DB_PASS" \
-                        SPRING_PROFILES_ACTIVE=postgres
-
                     echo "5. Publish Service/Route..."
                     oc expose deployment "$APP_NAME" --port=8080 --target-port=8080 >/dev/null 2>&1 || true
                     oc expose service "$APP_NAME" >/dev/null 2>&1 || true

@@ -40,6 +40,12 @@ pipeline {
                 volumeMounts:
                   - name: buildah-storage
                     mountPath: /var/lib/containers
+              - name: tools
+                image: 10.89.25.146:9006/jenkins/devops-tools:latest
+                command: ['cat']
+                tty: true
+                securityContext:
+                  privileged: true
             '''
         }
     }

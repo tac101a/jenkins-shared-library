@@ -4,8 +4,6 @@ def call(Map config) {
     def buildNum = config.buildNum
     def nexusDockerUrl = config.nexusDockerUrl
     def credId = config.credId
-    def dbUrl = config.dbUrl
-    def dbCredId = config.dbCredId
 
     def safeBranchName = branchName.replaceAll("/", "-")
     def imageTag = "${nexusDockerUrl}/${appName}:${buildNum}-${safeBranchName}"
@@ -15,14 +13,12 @@ def call(Map config) {
     withCredentials([string(credentialsId: 'openshift-crc-token', variable: 'OS_TOKEN')]) {
         withCredentials([
             usernamePassword(credentialsId: credId, passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER'),
-            usernamePassword(credentialsId: dbCredId, passwordVariable: 'DB_PASS', usernameVariable: 'DB_USER'),
             usernamePassword(credentialsId: 'node-145-cred', passwordVariable: 'NODE_PASS', usernameVariable: 'NODE_USER')
         ]) {
             withEnv([
                 'IMAGE_TAG=' + imageTag,
                 'NEXUS_URL=' + nexusDockerUrl,
-                'APP_NAME=' + appName,
-                'DB_URL=' + dbUrl
+                'APP_NAME=' + appName
             ]) {
                 sh '''
                     set +x

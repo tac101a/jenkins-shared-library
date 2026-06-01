@@ -15,7 +15,8 @@ def call(Map config) {
     withCredentials([string(credentialsId: 'openshift-crc-token', variable: 'OS_TOKEN')]) {
         withCredentials([
             usernamePassword(credentialsId: credId, passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER'),
-            usernamePassword(credentialsId: dbCredId, passwordVariable: 'DB_PASS', usernameVariable: 'DB_USER')
+            usernamePassword(credentialsId: dbCredId, passwordVariable: 'DB_PASS', usernameVariable: 'DB_USER'),
+            usernamePassword(credentialsId: 'node-145-cred', passwordVariable: 'NODE_PASS', usernameVariable: 'NODE_USER')
         ]) {
             withEnv([
                 'IMAGE_TAG=' + imageTag,
@@ -36,6 +37,9 @@ def call(Map config) {
                         --docker-password="$DOCKER_PASS" \
                         --dry-run=client -o yaml | oc apply -f -
                     oc secrets link default nexus-docker-credentials --for=pull >/dev/null 2>&1 || true
+
+                    echo "2.5. Cache Image on Node 145 via SSH (Bypass Insecure Registry)..."
+                    sshpass -p "$NODE_PASS" ssh -o StrictHostKeyChecking=no "$NODE_USER"@10.89.25.145 "podman pull --tls-verify=false $IMAGE_TAG"
 
                     echo "3. Cap nhat Deployment..."
                     if oc get deployment "$APP_NAME" >/dev/null 2>&1; then

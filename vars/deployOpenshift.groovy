@@ -23,8 +23,7 @@ def call(Map config) {
                 'APP_NAME=' + appName,
                 'DB_URL=' + dbUrl
             ]) {
-                container('tools') {
-                    sh '''
+                sh '''
                     set +x
                     echo "1. Dang nhap OpenShift CRC..."
                     oc login --token=${OS_TOKEN} --server=https://api.crc.testing:6443 --insecure-skip-tls-verify=true
@@ -58,8 +57,7 @@ def call(Map config) {
 
                     echo "6. Rollout Status..."
                     oc rollout status deployment/"$APP_NAME" --timeout=180s
-                    '''
-                }
+                '''
             }
         }
     }

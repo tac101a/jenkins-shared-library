@@ -3,6 +3,7 @@ def call(Map config) {
     def branchName = config.branch
     def buildNum = config.buildNum
     def nexusDockerUrl = config.nexusDockerUrl
+    def credId = config.credId
 
     def safeBranchName = branchName.replaceAll("/", "-")
     def imageTag = "${nexusDockerUrl}/${appName}:${buildNum}-${safeBranchName}"
@@ -10,31 +11,50 @@ def call(Map config) {
     echo "Tien hanh Deploy OpenShift Image: ${imageTag}"
 
     withCredentials([string(credentialsId: 'openshift-crc-token', variable: 'OS_TOKEN')]) {
-        withEnv([
-            'IMAGE_TAG=' + imageTag,
-            'NEXUS_URL=' + nexusDockerUrl,
-            'APP_NAME=' + appName
+        withCredentials([
+            usernamePassword(credentialsId: credId, passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER'),
+            usernamePassword(credentialsId: 'node-145-cred', passwordVariable: 'NODE_PASS', usernameVariable: 'NODE_USER')
         ]) {
-            sh '''
-                set +x
-                echo "1. Dang nhap OpenShift CRC..."
-                oc login --token=${OS_TOKEN} --server=https://api.ocp.bankhub.s68:6443 --insecure-skip-tls-verify=true
-                oc project training
+            withEnv([
+                'IMAGE_TAG=' + imageTag,
+                'NEXUS_URL=' + nexusDockerUrl,
+                'APP_NAME=' + appName
+            ]) {
+                sh '''
+                    set +x
+                    echo "1. Dang nhap OpenShift CRC..."
+                    oc login --token=${OS_TOKEN} --server=https://api.ocp.bankhub.s68:6443 --insecure-skip-tls-verify=true
+                    oc project training
 
-                echo "3. Cap nhat Deployment..."
-                if oc get deployment "$APP_NAME" >/dev/null 2>&1; then
-                    oc set image deployment/"$APP_NAME" "$APP_NAME"="$IMAGE_TAG"
-                else
-                    oc create deployment "$APP_NAME" --image="$IMAGE_TAG"
-                fi
+                    echo "2. Cau hinh image pull secret..."
+                    oc create secret docker-registry nexus-docker-credentials \\
+                        --docker-server="$NEXUS_URL" \\
+                        --docker-username="$DOCKER_USER" \\
+                        --docker-password="$DOCKER_PASS" \\
+                        --dry-run=client -o yaml | oc apply -f -
+                    oc secrets link default nexus-docker-credentials --for=pull >/dev/null 2>&1 || true
 
-                echo "5. Publish Service/Route..."
-                oc expose deployment "$APP_NAME" --port=8080 --target-port=8080 >/dev/null 2>&1 || true
-                oc expose service "$APP_NAME" >/dev/null 2>&1 || true
+                    echo "2.5. Cache Image on Node 145 via SSH (Sudo)..."
+                    sshpass -p "$NODE_PASS" ssh -o StrictHostKeyChecking=no "$NODE_USER"@10.89.25.145 "echo \\"$NODE_PASS\\" | sudo -S podman pull --tls-verify=false --creds=\\"$DOCKER_USER:$DOCKER_PASS\\" $IMAGE_TAG"
 
-                echo "6. Rollout Status..."
-                oc rollout status deployment/"$APP_NAME" --timeout=180s
-            '''
+                    echo "3. Cap nhat Deployment..."
+                    if oc get deployment "$APP_NAME" >/dev/null 2>&1; then
+                        oc set image deployment/"$APP_NAME" "$APP_NAME"="$IMAGE_TAG"
+                    else
+                        oc create deployment "$APP_NAME" --image="$IMAGE_TAG"
+                    fi
+
+                    echo "4. Ep Pod chay tren Master Node 145 (NodeSelector + Toleration)..."
+                    oc patch deployment/"$APP_NAME" --patch '{"spec":{"template":{"spec":{"nodeSelector":{"kubernetes.io/hostname":"cpp00061764l"},"tolerations":[{"operator":"Exists"}]}}}}'
+
+                    echo "5. Publish Service/Route..."
+                    oc expose deployment "$APP_NAME" --port=8080 --target-port=8080 >/dev/null 2>&1 || true
+                    oc expose service "$APP_NAME" >/dev/null 2>&1 || true
+
+                    echo "6. Rollout Status..."
+                    oc rollout status deployment/"$APP_NAME" --timeout=180s
+                '''
+            }
         }
     }
 }

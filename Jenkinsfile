@@ -49,7 +49,7 @@ pipeline {
         GITHUB_REPO_DOMAIN = '10.89.25.145/devops-training/2026/anhcnt1/spring-petclinic.git'
         SONAR_SERVER_NAME = 'sonar-server'
         NEXUS_URL = 'http' + '://10.89.25.146:8081/repository/maven-releases'
-        NEXUS_DOCKER_URL = 'image-registry.openshift-image-registry.svc:5000/training'
+        NEXUS_DOCKER_URL = '10.89.25.146:8082'
         GIT_CREDENTIALS_ID = 'gitlab-token-credentials'
         NEXUS_CREDENTIALS_ID = 'nexus-credentials'
     }

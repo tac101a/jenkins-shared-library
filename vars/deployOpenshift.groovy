@@ -12,8 +12,7 @@ def call(Map config) {
 
     withCredentials([string(credentialsId: 'openshift-crc-token', variable: 'OS_TOKEN')]) {
         withCredentials([
-            usernamePassword(credentialsId: credId, passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER'),
-            usernamePassword(credentialsId: 'node-145-cred', passwordVariable: 'NODE_PASS', usernameVariable: 'NODE_USER')
+            usernamePassword(credentialsId: credId, passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')
         ]) {
             withEnv([
                 'IMAGE_TAG=' + imageTag,
@@ -34,9 +33,6 @@ def call(Map config) {
                         --dry-run=client -o yaml | oc apply -f -
                     oc secrets link default nexus-docker-credentials --for=pull >/dev/null 2>&1 || true
 
-                    echo "2.5. Cache Image on Node 145 via SSH (Sudo)..."
-                    sshpass -p "$NODE_PASS" ssh -o StrictHostKeyChecking=no "$NODE_USER"@10.89.25.145 "echo \\"$NODE_PASS\\" | sudo -S podman pull --tls-verify=false --creds=\\"$DOCKER_USER:$DOCKER_PASS\\" $IMAGE_TAG"
-
                     echo "3. Cap nhat Deployment..."
                     if oc get deployment "$APP_NAME" >/dev/null 2>&1; then
                         oc set image deployment/"$APP_NAME" "$APP_NAME"="$IMAGE_TAG"
@@ -44,14 +40,11 @@ def call(Map config) {
                         oc create deployment "$APP_NAME" --image="$IMAGE_TAG"
                     fi
 
-                    echo "4. Ep Pod chay tren Master Node 145 (NodeSelector + Toleration)..."
-                    oc patch deployment/"$APP_NAME" --patch '{"spec":{"template":{"spec":{"nodeSelector":{"kubernetes.io/hostname":"cpp00061764l"},"tolerations":[{"operator":"Exists"}]}}}}'
-
-                    echo "5. Publish Service/Route..."
+                    echo "4. Publish Service/Route..."
                     oc expose deployment "$APP_NAME" --port=8080 --target-port=8080 >/dev/null 2>&1 || true
                     oc expose service "$APP_NAME" >/dev/null 2>&1 || true
 
-                    echo "6. Rollout Status..."
+                    echo "5. Rollout Status..."
                     oc rollout status deployment/"$APP_NAME" --timeout=180s
                 '''
             }

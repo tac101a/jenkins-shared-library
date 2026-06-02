@@ -35,7 +35,7 @@ def call(Map config) {
                     oc secrets link default nexus-docker-credentials --for=pull >/dev/null 2>&1 || true
 
                     echo "2.5. Cache Image on Node 145 via SSH (Bypass Insecure Registry)..."
-                    sshpass -p "$NODE_PASS" ssh -o StrictHostKeyChecking=no "$NODE_USER"@10.89.25.145 "podman pull --tls-verify=false --creds=\"$DOCKER_USER:$DOCKER_PASS\" $IMAGE_TAG"
+                    sshpass -p "$NODE_PASS" ssh -o StrictHostKeyChecking=no "$NODE_USER"@10.89.25.145 "echo \"$NODE_PASS\" | sudo -S podman pull --tls-verify=false --creds=\"$DOCKER_USER:$DOCKER_PASS\" $IMAGE_TAG"
 
                     echo "3. Cap nhat Deployment..."
                     if oc get deployment "$APP_NAME" >/dev/null 2>&1; then

@@ -22,3 +22,12 @@ This library provides the following standardized pipeline steps:
 - `deployApp(Map config)`: Performs a graceful shutdown and deploys the `.jar` artifact on a traditional Linux VM.
 - `createGitTag(Map config)`: Automatically generates and pushes Git tags for `uat` and `main` release pipelines.
 - `notifySlack(Map config)`: Sends formatted build status alerts (Success/Failure) to the team's Slack channel.
+
+## Architectural Decision: Declarative vs. Scripted Pipeline
+
+In this library and the accompanying `Jenkinsfile`, we strictly enforce the **Declarative Pipeline** architecture over the traditional Scripted `podTemplate()`.
+
+1. **Native Kubernetes Integration:** The declarative `agent { kubernetes { yaml '''...''' } }` block is automatically translated into a Kubernetes Pod Template under the hood. It provides a cleaner, highly structured, and universally readable syntax.
+2. **Separation of Concerns & Security:** Scripted pipelines often encourage wrapping the entire CI/CD flow inside a single `podTemplate` with a highly privileged `ServiceAccount`. Our declarative approach enforces the **Principle of Least Privilege**.
+   - **Stages 1 to 4.5 (Build/CI):** Run inside an isolated, ephemeral Kubernetes Pod using the default unprivileged account.
+   - **Stage 5 (Deploy/CD):** Uses `agent any` to step out of the build Pod and securely inject the OpenShift API token (`oc login`) only when necessary. This ensures that the build environment never inadvertently exposes cluster admin privileges.

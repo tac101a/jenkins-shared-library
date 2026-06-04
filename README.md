@@ -2,7 +2,7 @@
 
 A centralized, declarative Jenkins Shared Library designed for Enterprise CI/CD automation. This library encapsulates complex pipeline logic into reusable, modular functions.
 
-## 🚀 Usage
+## Usage
 
 To import this library into your `Jenkinsfile`, use the following annotation at the top of the file:
 

@@ -1,6 +1,4 @@
-# ==========================================
 # STAGE 1: BUILDER
-# ==========================================
 # Use a Maven and JDK 17 base image
 FROM docker.io/eclipse-temurin:17-jdk-jammy AS builder
 
@@ -20,9 +18,7 @@ COPY src ./src
 # Package the application with tests skipped in batch mode
 RUN ./mvnw package -DskipTests -B
 
-# ==========================================
 # STAGE 2: RUNTIME
-# ==========================================
 # Use a lightweight JRE image for runtime
 FROM docker.io/eclipse-temurin:17-jre-jammy
 

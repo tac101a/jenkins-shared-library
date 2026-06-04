@@ -1,13 +1,13 @@
-# Hệ điều hành
+# OS Generated Files
 .DS_Store
 Thumbs.db
 
-# Cấu hình IDE (Rất quan trọng để không ép người khác dùng chung IDE với bạn)
+# IDE Configurations
 .idea/
 .vscode/
 *.iml
 *.iws
 
-# Log và các file tạm
+# Logs and Temporary Files
 *.log
 tmp/

@@ -1,45 +1,45 @@
 # ==========================================
-# STAGE 1: BUILDER (Khối xây dựng)
+# STAGE 1: BUILDER
 # ==========================================
-# Sử dụng base image có sẵn Maven và JDK 17
+# Use a Maven and JDK 17 base image
 FROM docker.io/eclipse-temurin:17-jdk-jammy AS builder
 
-# Thiết lập thư mục làm việc bên trong container
+# Set working directory inside the container
 WORKDIR /app
 
-# Copy file cấu hình maven trước để tận dụng Docker Cache
+# Copy Maven configuration first to optimize Docker layer caching
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 
-# Tải các thư viện dependency với chế độ Batch mode (-B) để tránh lỗi I/O
+# Download dependencies in batch mode to reduce interactive output
 RUN ./mvnw dependency:go-offline -B
 
-# Copy toàn bộ mã nguồn vào
+# Copy application source code
 COPY src ./src
 
-# Tiến hành đóng gói ứng dụng (Bỏ test và bật Batch mode)
+# Package the application with tests skipped in batch mode
 RUN ./mvnw package -DskipTests -B
 
 # ==========================================
-# STAGE 2: RUNTIME (Khối thực thi)
+# STAGE 2: RUNTIME
 # ==========================================
-# Chỉ sử dụng JRE (Môi trường chạy) siêu nhẹ, không cần Maven nữa
+# Use a lightweight JRE image for runtime
 FROM docker.io/eclipse-temurin:17-jre-jammy
 
 WORKDIR /app
 
-# Tạo một user không có quyền root để chạy ứng dụng (Bảo mật tối thượng)
+# Create a non-root user for secure application execution
 RUN addgroup --system spring && adduser --system --ingroup spring springuser
 USER springuser
 
-# Ép xung RAM cho Java bên trong Container
+# Optimize JVM memory limits for the container
 ENV JAVA_OPTS="-Xmx256m -Xms256m"
 
-# Chỉ copy đúng duy nhất cái file .jar từ STAGE 1 sang STAGE 2
+# Copy the packaged application from the builder stage
 COPY --from=builder /app/target/*.jar app.jar
 
-# Khai báo cổng mà ứng dụng sẽ lắng nghe (Petclinic mặc định chạy 8080)
+# Expose the default Spring Petclinic application port
 EXPOSE 8080
 
-# Lệnh khởi chạy ứng dụng khi Container nổ máy
+# Start the application
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

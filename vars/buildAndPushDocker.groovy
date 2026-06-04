@@ -8,7 +8,7 @@ def call(Map config) {
     def safeBranchName = branchName.replaceAll("/", "-")
     def imageTag = "${nexusDockerUrl}/${appName}:${buildNum}-${safeBranchName}"
 
-    echo "Bat dau tien trinh Build & Push Docker Image: ${imageTag}"
+    echo "Starting Build & Push Docker Image process: ${imageTag}"
 
     withCredentials([usernamePassword(credentialsId: credId, passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
         withEnv([
@@ -17,16 +17,16 @@ def call(Map config) {
         ]) {
             container('buildah') {
                 sh '''
-                    echo "1. Dang nhap vao Nexus Docker Registry..."
+                    echo "1. Logging into Nexus Docker Registry..."
                     buildah login --tls-verify=false -u "$DOCKER_USER" -p "$DOCKER_PASS" $NEXUS_URL
 
-                    echo "2. Build Docker Image tu Dockerfile..."
+                    echo "2. Building Docker Image from Dockerfile..."
                     buildah bud --tls-verify=false -t $IMAGE_TAG .
 
-                    echo "3. Push Docker Image len Nexus..."
+                    echo "3. Pushing Docker Image to Nexus..."
                     buildah push --tls-verify=false --format docker $IMAGE_TAG
 
-                    echo "4. Don dep rac..."
+                    echo "4. Cleaning up dangling images..."
                     buildah rmi $IMAGE_TAG
                 '''
             }

@@ -17,7 +17,7 @@ def call(Map config) {
 		return
 	}
 
-	echo "Kich hoat Auto Tagging: ${generatedTagName}"
+	echo "Activating Auto Tagging: ${generatedTagName}"
 
 	withEnv(["TAG_NAME=${generatedTagName}"]) {
 		withCredentials([usernamePassword(credentialsId: credId, passwordVariable: 'GIT_PASS', usernameVariable: 'GIT_USER')]) {

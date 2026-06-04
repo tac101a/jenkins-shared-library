@@ -11,7 +11,7 @@ def call(Map config) {
 					SAFE_BRANCH_NAME=$(echo "$APP_BRANCH" | tr '/' '-')
 					JAR_FILE=$(ls target/*.jar | grep -v plain)
 
-					echo "Dang day artifact cua nhanh $APP_BRANCH len Nexus..."
+					echo "Uploading artifact for branch $APP_BRANCH to Nexus..."
 
 					curl -fSsl -u "$NEXUS_USR:$NEXUS_PSW" \
 						 --upload-file "$JAR_FILE" \
